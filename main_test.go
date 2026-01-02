@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -70,8 +69,7 @@ func TestCafeCount(t *testing.T) {
 		handler.ServeHTTP(response, req)
 		require.Equal(t, http.StatusOK, response.Code)
 
-		body, _ := io.ReadAll(response.Body)
-		bodyString := strings.TrimSpace(string(body))
+		bodyString := strings.TrimSpace(string(response.Body.String()))
 
 		var cafes []string
 		if bodyString != "" {
@@ -79,8 +77,7 @@ func TestCafeCount(t *testing.T) {
 		} else {
 			cafes = []string{}
 		}
-
-		assert.Equal(t, v.want, len(cafes))
+		assert.Len(t, cafes, v.want)
 
 	}
 }
@@ -103,8 +100,7 @@ func TestCafeSearch(t *testing.T) {
 		handler.ServeHTTP(response, req)
 		require.Equal(t, http.StatusOK, response.Code)
 
-		body, _ := io.ReadAll(response.Body)
-		bodyString := strings.TrimSpace(string(body))
+		bodyString := strings.TrimSpace(string(response.Body.String()))
 
 		var cafes []string
 		if bodyString != "" {
@@ -113,11 +109,10 @@ func TestCafeSearch(t *testing.T) {
 			cafes = []string{}
 		}
 
+		assert.Len(t, cafes, v.wantCount)
 		for _, cafeCurrent := range cafes {
 			assert.True(t, strings.Contains(strings.ToLower(cafeCurrent), strings.ToLower(v.search)))
 		}
-
-		assert.Equal(t, v.wantCount, len(cafes))
 
 	}
 }
